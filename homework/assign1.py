@@ -9,5 +9,17 @@ print(D)
 
 # Convert to numpy datatype
 D = D.to_numpy()
+row = np.size(D, 0)
 
-mean = np.matmul(np.transpose(D), np.ones())
+# Compute mean for each attribute
+mean = np.matmul(np.transpose(D), np.ones((row, 1))) / row
+print("This is the mean vector μ:\n{}".format(mean))
+
+# Compute
+
+# Compute the center data matrix
+D_center = D - np.matmul(np.ones((row, 1)), np.transpose(mean))
+
+# Compute the sample covariance inner product form
+D_var = np.matmul(np.transpose(D_center), D_center) / row
+print(D_var)

@@ -1,13 +1,14 @@
-from numpy.core.fromnumeric import size
 import pandas as pd
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-EPS = 0.0001
+filename = sys.argv[1]
 
-D = pd.read_csv('energydata_complete.csv')
+EPS = float(sys.argv[2])
+
+D = pd.read_csv(filename)
 D.pop('date')
 D.pop('rv2')
 print(D)
@@ -16,8 +17,8 @@ print(D)
 D = D.to_numpy()
 row = np.size(D, 0)
 col = np.size(D, 1)
-
-np.set_printoptions(precision=3, suppress=False, linewidth=400)
+#print(np.sum(D[:,1])/row)
+np.set_printoptions(precision=3, suppress=False, threshold=5)
 #np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
 # Compute mean for each attribute
@@ -35,9 +36,6 @@ D_center = D - np.matmul(np.ones((row, 1)), np.transpose(mean))
 D_var_inner = np.matmul(np.transpose(D_center), D_center) / row
 print("This is the sample convariance in inner product form:\n{}\n".format(D_var_inner))
 
-#D_var_inner_row = np.size(D_var_inner,0)
-# Compute the sample covariance outer product form
-#print(np.outer(np.array([[1],[2],[3],[4]]), np.array([1,2,3])))
 D_var_outer = np.zeros((col, col))
 #D_center_T = np.transpose(D_center)
 for i in range(row):
@@ -127,8 +125,8 @@ x_normalize = x_new / np.linalg.norm(x_new)
 
 e_value = np.max(np.abs(x_new))
 e_vector = x_normalize
-print('This is eigenvalue: {:.3f}\n'.format(e_value))
-print('This is domiant eigenvector: {}\n'.format(e_vector))
+print('This is eigenvalue:\n{:.3f}\n'.format(e_value))
+print('This is domiant eigenvector:\n{}\n'.format(e_vector))
 #domiant_e_vector = D_var_inner - np.outer(x_normalize, np.transpose(x_normalize))
 #print(np.linalg.eig(D_var_inner))
 

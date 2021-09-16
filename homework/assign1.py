@@ -17,7 +17,8 @@ D = D.to_numpy()
 row = np.size(D, 0)
 col = np.size(D, 1)
 
-np.set_printoptions(precision=3)
+np.set_printoptions(precision=3, suppress=False)
+#np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
 # Compute mean for each attribute
 mean = np.matmul(np.transpose(D), np.ones((row, 1))) / row

@@ -29,7 +29,7 @@ print("This is the total variance:\n{:.3f}\n".format(var_D))
 
 # Compute the center data matrix
 D_center = D - np.matmul(np.ones((row, 1)), np.transpose(mean))
-
+#print(np.matmul(np.ones((row, 1)), np.transpose(mean)))
 # Compute the sample covariance inner product form
 D_var_inner = np.matmul(np.transpose(D_center), D_center) / row
 print("This is the sample convariance in inner product form:\n{}\n".format(D_var_inner))
@@ -57,7 +57,7 @@ print('This is the correlation_matrix:\n{}\n'.format(correlate_matrix))
 
 # Convert the correlation matrix to the degree
 correlate_matrix_degree = np.degrees(np.arccos(correlate_matrix))
-print(np.degrees(np.arccos(correlate_matrix)))
+#print(np.degrees(np.arccos(correlate_matrix)))
 
 most_correlated = 99999
 most_correlated_coord = None
@@ -107,18 +107,31 @@ plt.plot(D[:, anti_correlated_coord[0]],
 plt.show()
 
 # print(anti_correlated)
-np.random.seed(13)
+#np.random.seed(13)
 x_init = np.random.normal(size=(col, 1))
 x_new = None
 while(True):
     x_new = np.matmul(D_var_inner,x_init)
-    #print(x_new)
-    x_scaled = x_new / np.max(np.abs(x_new))
+    if np.max(np.abs(x_new)) == np.max(x_new):
+        x_scaled = x_new / np.max(x_new)
+    else:
+        x_scaled = x_new / (-np.max(np.abs(x_new)))
     if np.linalg.norm(x_scaled - x_init) < EPS:
         break
-    #print(x_init)
     x_init = x_scaled
 
-print(x_new)
+#print(x_new)
 x_normalize = x_new / np.linalg.norm(x_new)
-print(x_normalize)
+#print(x_normalize)
+
+e_value = np.max(np.abs(x_new))
+e_vector = x_normalize
+print('This is eigenvalue: {:.3f}\n'.format(e_value))
+print('This is domiant eigenvector: {}\n'.format(e_vector))
+#domiant_e_vector = D_var_inner - np.outer(x_normalize, np.transpose(x_normalize))
+#print(np.linalg.eig(D_var_inner))
+
+proj_u1 = np.matmul(D_center, e_vector)
+print(proj_u1)
+plt.plot(proj_u1, np.array(row*[0]), 'bx')
+plt.show()

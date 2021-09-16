@@ -17,7 +17,7 @@ D = D.to_numpy()
 row = np.size(D, 0)
 col = np.size(D, 1)
 
-np.set_printoptions(precision=3, suppress=False)
+np.set_printoptions(precision=3, suppress=False, linewidth=400)
 #np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
 # Compute mean for each attribute
@@ -133,6 +133,6 @@ print('This is domiant eigenvector: {}\n'.format(e_vector))
 #print(np.linalg.eig(D_var_inner))
 
 proj_u1 = np.matmul(D_center, e_vector)
-print(proj_u1)
+#print(proj_u1)
 plt.plot(proj_u1, np.array(row*[0]), 'bx')
 plt.show()

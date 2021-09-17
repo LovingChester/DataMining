@@ -76,7 +76,7 @@ for i in range(col):
             anti_correlated = correlate_matrix_degree[i, j]
             anti_correlated_coord = (i, j)
 
-print(most_correlated_coord, least_correlated_coord, anti_correlated_coord)
+#print(most_correlated_coord, least_correlated_coord, anti_correlated_coord)
 
 max_chart_size = max(np.max(D[:, most_correlated_coord[0]]),
                  np.max(D[:, most_correlated_coord[1]]))

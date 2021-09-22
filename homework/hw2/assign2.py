@@ -38,12 +38,9 @@ print(e_values[col:])
 
 print(e_vectors)
 
-# Compute PCA
+# Part I: Principal Components Analysis
 r = 1
 while(True):
-    # frac = 0
-    # for i in range(r):
-    #     frac = frac + e_values[i]
     frac = sum(e_values[col-r:]) / sum(e_values)
     if r <= 3:
         MSE = sum(e_values) - sum(e_values[col-r:])
@@ -64,4 +61,6 @@ proj_u2 = np.matmul(D_center, e_vectors[:, [col-1, col-2]])
 plt.plot(proj_u2[:, [0,0]], proj_u2[:, [1,1]], 'bx')
 plt.show()
 
+
+# Part II: Diagonals in High Dimensions
 

@@ -29,10 +29,13 @@ print("This is the total variance:\n{:.3f}\n".format(var_D))
 # Compute the center data matrix
 D_center = D - np.matmul(np.ones((row, 1)), np.transpose(mean))
 
-# Compute the sample covariance inner product form
-D_var_inner = np.matmul(np.transpose(D_center), D_center) / row
+# # Compute the sample covariance inner product form
+# cov = np.matmul(np.transpose(D_center), D_center) / row
 
-e_values, e_vectors = np.linalg.eigh(D_var_inner)
+# Compute the sample covariance by np.cov
+cov = np.cov(D, rowvar=False, bias=True)
+
+e_values, e_vectors = np.linalg.eigh(cov)
 
 print(e_values[col:])
 

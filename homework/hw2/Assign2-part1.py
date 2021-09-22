@@ -55,7 +55,7 @@ while(True):
 print("Dimensions required: {}".format(r))
 
 # First PC
-proj_u1 = np.matmul(D_center, e_vectors[:, [col-1, col-1]])
+proj_u1 = np.matmul(D_center, e_vectors[:, [col-1]])
 plt.plot(proj_u1, np.array(row*[0]), 'bx')
 plt.show()
 

@@ -6,6 +6,7 @@ n = 100000
 
 np.set_printoptions(threshold=5)
 
+np.random.seed(10)
 #generate pairs of 10-dimensional vectors
 def PMF(d):
     sample = np.random.choice([1,-1], size=(n,d,2))
@@ -28,6 +29,11 @@ def PMF(d):
     plt.plot(unique_angle, angle_prob, 'rx')
     plt.show()
 
+    print("min for d = {} is {}".format(d, min(unique_angle)))
+    print("max for d = {} is {}".format(d, max(unique_angle)))
+    print("range for d = {} is {}".format(d, max(unique_angle)-min(unique_angle)))
+    print("mean for d = {} is {}".format(d, np.mean(np.array(angles))))
+    print("variance for d = {} is {}".format(d, np.var(np.array(angles))))
 
 PMF(10)
 PMF(100)

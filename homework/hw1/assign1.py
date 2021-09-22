@@ -35,7 +35,7 @@ D_center = D - np.matmul(np.ones((row, 1)), np.transpose(mean))
 # Compute the sample covariance inner product form
 D_var_inner = np.matmul(np.transpose(D_center), D_center) / row
 print("This is the sample convariance in inner product form:\n{}\n".format(D_var_inner))
-
+#print(np.cov(D, rowvar=False, bias=True))
 D_var_outer = np.zeros((col, col))
 #D_center_T = np.transpose(D_center)
 for i in range(row):

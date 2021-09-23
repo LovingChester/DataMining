@@ -47,7 +47,7 @@ while(True):
     frac = sum(e_values[col-r:]) / sum(e_values)
     if r == 3:
         MSE = sum(e_values) - sum(e_values[col-r:])
-        print("MSE is {:.3f}".format(MSE))
+        print("MSE is {:.3f} for the third component".format(MSE))
     if frac >= alpha:
         break
     r += 1

@@ -4,12 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-alpha = 0.975
+filename = sys.argv[1]
 
-D = pd.read_csv('energydata_complete.csv')
+alpha = float(sys.argv[2])
+
+D = pd.read_csv(filename)
 D.pop('date')
 D.pop('rv2')
-print(D)
+# print(D)
 
 # Convert to numpy datatype
 D = D.to_numpy()
@@ -37,9 +39,9 @@ cov = np.cov(D, rowvar=False, bias=True)
 
 e_values, e_vectors = np.linalg.eigh(cov)
 
-print(e_values[col:])
+# print(e_values[col-1:])
 
-print(e_vectors)
+# print(e_vectors)
 
 # Part I: Principal Components Analysis
 r = 1

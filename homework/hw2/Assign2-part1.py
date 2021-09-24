@@ -22,11 +22,11 @@ np.set_printoptions(precision=3, suppress=False, threshold=5)
 
 # Compute mean for each attribute
 mean = np.matmul(np.transpose(D), np.ones((row, 1))) / row
-print("This is the mean vector μ:\n{}\n".format(mean))
+#print("This is the mean vector μ:\n{}\n".format(mean))
 
 # Compute total variance
 var_D = sum(sum(D*D)) / row - np.linalg.norm(mean) ** 2
-print("This is the total variance:\n{:.3f}\n".format(var_D))
+#print("This is the total variance:\n{:.3f}\n".format(var_D))
 
 # Compute the center data matrix
 D_center = D - np.matmul(np.ones((row, 1)), np.transpose(mean))
@@ -57,12 +57,15 @@ while(True):
 print("Dimensions required: {}".format(r))
 
 # First PC
-proj_u1 = np.matmul(D_center, e_vectors[:, [col-1]])
-plt.plot(proj_u1, np.array(row*[0]), 'bx')
-plt.show()
+# proj_u1 = np.matmul(D_center, e_vectors[:, [col-1]])
+# plt.plot(proj_u1, np.array(row*[0]), 'bx')
+# plt.show()
 
 # Second PC
 proj_u2 = np.matmul(D_center, e_vectors[:, [col-1, col-2]])
+plt.title("second PC")
+plt.xlabel("u1")
+plt.ylabel("u2")
 plt.plot(proj_u2[:, [0,0]], proj_u2[:, [1,1]], 'bx')
 plt.show()
 

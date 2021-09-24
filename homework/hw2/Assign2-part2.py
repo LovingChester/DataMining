@@ -25,6 +25,9 @@ def PMF(d):
     for i in range(len(unique_angle)):
         angle_prob.append(angles.count(unique_angle[i]) / n)
 
+    plt.title("PMF for d = {}".format(d))
+    plt.xlabel("angle")
+    plt.ylabel("probability")
     plt.plot(unique_angle, angle_prob, 'b')
     plt.plot(unique_angle, angle_prob, 'rx')
     plt.show()

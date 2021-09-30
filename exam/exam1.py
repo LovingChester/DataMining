@@ -52,12 +52,18 @@ def compute(D):
     correlate_matrix_degree = np.degrees(np.arccos(correlate_matrix))
     print('degree correlation:\n{}\n'.format(correlate_matrix_degree))
 
+    e_values, e_vectors = np.linalg.eigh(cov)
+    print(e_values)
+
+    print(e_vectors)
+
 #compute power iteration
 def power_iteration(D):
     row = np.size(D, 0)
     col = np.size(D, 1)
     cov = np.cov(D, rowvar=False, bias=True)
     x_init = np.random.normal(size=(col, 1))
+    x_init = np.array([[1],[1],[1]])
     x_new = None
     iteration = 1
     while(True):
@@ -68,10 +74,11 @@ def power_iteration(D):
             x_scaled = x_new / np.max(x_new)
         else:
             x_scaled = x_new / (-np.max(np.abs(x_new)))
-        print("scaled: {}".format(x_new))
+        print("scaled: {}".format(x_scaled))
         if np.linalg.norm(x_scaled - x_init) < EPS:
             break
         x_init = x_scaled
+        #if(iteration == 3): break
         iteration += 1
     
     x_normalize = x_new / np.linalg.norm(x_new)
@@ -81,11 +88,11 @@ def power_iteration(D):
     print('This is domiant eigenvector:\n{}\n'.format(e_vector))
 
 
-D = pd.read_csv('energydata_complete.csv')
-D.pop('date')
-D.pop('rv2')
-D = D.to_numpy()
-
+# D = pd.read_csv('energydata_complete.csv')
+# D.pop('date')
+# D.pop('rv2')
+# D = D.to_numpy()
+D = np.array([[1,3,2],[2,2,4],[2,1,5],[3,4,5]])
 compute(D)
 
 power_iteration(D)

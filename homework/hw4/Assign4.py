@@ -22,4 +22,12 @@ D_train = D[range(0, 13735), :]
 D_valid = D[range(13735, 15735), :]
 D_test = D[range(15735, 19735), :]
 
+# selecting the response and independent variables
+Dx_train = D_train[:, range(1, 28)]
+Dy_train = D_train[:, [0]]
+Dx_valid = D_valid[:, range(1, 28)]
+Dy_valid = D_valid[:, [0]]
+Dx_test = D_test[:, range(1, 28)]
+Dy_test = D_test[:, [0]]
+
 

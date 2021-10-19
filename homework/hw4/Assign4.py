@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 np.set_printoptions(precision=3, suppress=False, threshold=5)
 
-ALPHA = 420
+ALPHA = 400
 ETA = 0.00001
 EPS = 0.0001
 MAXITER = 5000
@@ -42,19 +42,25 @@ while(t < MAXITER):
     gradient = -np.matmul(np.transpose(Dx_train), Dy_train) + \
         np.matmul(np.matmul(np.transpose(Dx_train), Dx_train), w) + ALPHA * w
     w_prev = np.copy(w)
-    #print(gradient)
     w = w - ETA * gradient
     if np.linalg.norm(w - w_prev) <= EPS:
         break
     t += 1
 
-print(w)
-print(t)
+print("The w is:\n{}".format(w))
+#print(t)
 
 # start validation
 Dx_valid = np.insert(Dx_valid, 0, 2000*[1], axis=1)
-SSE = np.linalg.norm(np.matmul(Dx_valid, w) - Dy_valid) ** 2
-print(SSE)
+SSE_valid = np.linalg.norm(np.matmul(Dx_valid, w) - Dy_valid) ** 2
+print("The SSE for valid is: {}".format(int(SSE_valid)))
 
-
-
+# start test
+Dx_test = np.insert(Dx_test, 0, 4000*[1], axis=1)
+SSE_test = np.linalg.norm(np.matmul(Dx_test, w) - Dy_test) ** 2
+#print(SSE_test)
+TSS_test = Dy_test - np.average(Dy_test) * np.ones((4000, 1))
+TSS_test = np.sum(TSS_test * TSS_test)
+#print(TSS_test)
+R_square = (TSS_test - SSE_test) / TSS_test
+print("The R square is: {}".format(R_square))

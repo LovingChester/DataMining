@@ -20,6 +20,7 @@ D = D.to_numpy()
 # scale the data
 scaler = StandardScaler()
 D = scaler.fit_transform(D)
+Dy = D[:, [0]]
 
 # define the training set, validation set and test_set
 D_train = D[range(0, 13735), :]
@@ -59,8 +60,8 @@ print("The SSE for valid is: {}".format(int(SSE_valid)))
 Dx_test = np.insert(Dx_test, 0, 4000*[1], axis=1)
 SSE_test = np.linalg.norm(np.matmul(Dx_test, w) - Dy_test) ** 2
 #print(SSE_test)
-TSS_test = Dy_test - np.average(Dy_test) * np.ones((4000, 1))
-TSS_test = np.sum(TSS_test * TSS_test)
+TSS = Dy - np.average(Dy) * np.ones((19735, 1))
+TSS = np.sum(TSS * TSS)
 #print(TSS_test)
-R_square = (TSS_test - SSE_test) / TSS_test
+R_square = (TSS - SSE_test) / TSS
 print("The R square is: {}".format(R_square))

@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 np.set_printoptions(precision=3, suppress=False, threshold=5)
 
-ALPHA = 10
+ALPHA = 420
 ETA = 0.00001
 EPS = 0.0001
 MAXITER = 5000
@@ -38,7 +38,6 @@ Dy_test = D_test[:, [0]]
 Dx_train = np.insert(Dx_train, 0, 13735*[1], axis=1)
 t = 0
 w = np.ones((27, 1))
-# print(np.average(Dx_train[:, 0]), np.var(Dx_train[:, 0]))
 while(t < MAXITER):
     gradient = -np.matmul(np.transpose(Dx_train), Dy_train) + \
         np.matmul(np.matmul(np.transpose(Dx_train), Dx_train), w) + ALPHA * w
@@ -53,4 +52,9 @@ print(w)
 print(t)
 
 # start validation
+Dx_valid = np.insert(Dx_valid, 0, 2000*[1], axis=1)
+SSE = np.linalg.norm(np.matmul(Dx_valid, w) - Dy_valid) ** 2
+print(SSE)
+
+
 

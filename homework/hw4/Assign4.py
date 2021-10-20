@@ -64,4 +64,4 @@ TSS = Dy - np.average(Dy) * np.ones((19735, 1))
 TSS = np.sum(TSS * TSS)
 #print(TSS_test)
 R_square = (TSS - SSE_test) / TSS
-print("The R square is: {}".format(R_square))
+print("The R square is: {:.3f}".format(R_square))

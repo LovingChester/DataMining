@@ -7,12 +7,13 @@ from sklearn.preprocessing import StandardScaler
 
 np.set_printoptions(precision=3, suppress=False, threshold=5)
 
-ALPHA = 400
-ETA = 0.00001
-EPS = 0.0001
-MAXITER = 5000
+filename = sys.argv[1]
+ALPHA = int(sys.argv[2])
+ETA = float(sys.argv[3])
+EPS = float(sys.argv[4])
+MAXITER = int(sys.argv[5])
 
-D = pd.read_csv('energydata_complete.csv')
+D = pd.read_csv(filename)
 D.pop('date')
 D.pop('rv2')
 

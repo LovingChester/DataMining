@@ -24,7 +24,7 @@ def SVM_DUAL_LINEAR(Dx, Dy):
         K_row = []
         for j in range(row):
             if KERNEL == "linear":
-                K_row.append(np.dot(Dx[i, :], Dx[j, :]) ** 2)
+                K_row.append(np.dot(Dx[i, :], Dx[j, :]) + 1)
             else:
                 diff = Dx[i, :] - Dx[j, :]
                 kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM))
@@ -34,7 +34,7 @@ def SVM_DUAL_LINEAR(Dx, Dy):
     K = np.array(K)
 
     # augment K
-    K = np.insert(K, 0, row*[1], axis=1)
+    #K = np.insert(K, 0, row*[1], axis=1)
 
     # store the step size
     step_size = []

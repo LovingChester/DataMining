@@ -10,8 +10,8 @@ from sklearn.preprocessing import StandardScaler
 np.set_printoptions(precision=3, suppress=False, threshold=5)
 
 FILENAME = "energydata_complete.csv"
-C = 0.05
-EPS = 0.001
+C = 0.5
+EPS = 0.01
 MAXITER = 5000
 KERNEL = "linear"
 KERNEL_PARAM = 10
@@ -67,7 +67,7 @@ def SVM_DUAL(Dx, Dy):
         alpha = alpha_next
         #print(t, diff)
         t = t + 1
-    print(t)
+    print("iteration time: {}".format(t))
     return alpha
 
 D = pd.read_csv(FILENAME)
@@ -81,10 +81,6 @@ scaler = StandardScaler()
 Dx = D[:, range(1, 27)]
 Dx = scaler.fit_transform(Dx)
 Dy = D[:, [0]]
-
-# Dx_train = Dx[range(0, 5000), :]
-# Dx_valid = Dx[range(5000, 7000), :]
-# Dx_test = Dx[range(7000, 12000), :]
 
 # selecting the response and independent variables
 Dx_train = Dx[range(0, 5000), :]
@@ -114,9 +110,10 @@ for i in range(5000):
 start = time.time()
 
 alpha = SVM_DUAL(Dx_train, Dy_train)
-# print(np.count_nonzero(alpha))
+sup_vec_num = np.count_nonzero(alpha)
+print("Number of support vectors for {} kernel: {}".format(KERNEL, sup_vec_num))
+
 # start validation
-#print(np.transpose(Dx_valid[[0],:]))
 y_pred = []
 for i in range(2000):
     point = Dx_valid[i, :]
@@ -131,15 +128,33 @@ for i in range(2000):
             value += alpha[j, 0] * Dy_train[j, 0] * kernel
     y_pred.append(value)
 
-count = 0
 y_pred = np.sign(y_pred)
-# for i in range(2000):
-#     if y_pred[i] == 1:
-#         count += 1
-# print(count)
 y_pred = y_pred.reshape(1, -1)
 y_pred = np.transpose(y_pred)
-print(1 - np.count_nonzero(y_pred-Dy_valid) / 2000)
+valid_accuracy = 1 - np.count_nonzero(y_pred-Dy_valid) / 2000
+print("Validation accuracy: {}".format(valid_accuracy))
+
+# start test
+y_pred = []
+for i in range(5000):
+    point = Dx_test[i, :]
+    value = 0
+    for j in range(5000):
+        train_x = Dx_train[j, :]
+        if KERNEL == 'linear':
+            value += alpha[j, 0] * Dy_train[j, 0] * \
+                (np.dot(train_x, point) + 1)
+        else:
+            diff = train_x - point
+            kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM)) + 1
+            value += alpha[j, 0] * Dy_train[j, 0] * kernel
+    y_pred.append(value)
+
+y_pred = np.sign(y_pred)
+y_pred = y_pred.reshape(1, -1)
+y_pred = np.transpose(y_pred)
+valid_accuracy = 1 - np.count_nonzero(y_pred-Dy_test) / 5000
+print("Test accuracy: {}".format(valid_accuracy))
 
 end = time.time()
 print(end - start)

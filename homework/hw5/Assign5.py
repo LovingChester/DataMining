@@ -133,10 +133,13 @@ for i in range(2000):
 
 count = 0
 y_pred = np.sign(y_pred)
-for i in range(2000):
-    if y_pred[i] == 1:
-        count += 1
-print(count)
+# for i in range(2000):
+#     if y_pred[i] == 1:
+#         count += 1
+# print(count)
+y_pred = y_pred.reshape(1, -1)
+y_pred = np.transpose(y_pred)
+print(1 - np.count_nonzero(y_pred-Dy_valid) / 2000)
 
 end = time.time()
 print(end - start)

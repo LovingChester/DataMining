@@ -53,7 +53,7 @@ def SVM_DUAL(Dx, Dy):
         l = list(range(row))
         rd.shuffle(l)
         for k in l:
-            alpha_next[k, 0] = alpha_next[k, 0] + step_size[k] * (1 -
+            alpha_next[k, 0] = alpha_next[k, 0] + step_size[k] * (1 - \
                 Dy[k, 0] * np.sum(alpha_next * Dy * K_aug[:, [k]]))
             
             if alpha_next[k, 0] < 0:

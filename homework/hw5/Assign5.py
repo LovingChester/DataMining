@@ -11,7 +11,7 @@ np.set_printoptions(precision=3, suppress=False, threshold=5)
 
 FILENAME = "energydata_complete.csv"
 C = 0.05
-EPS = 0.0001
+EPS = 0.001
 MAXITER = 5000
 KERNEL = "linear"
 KERNEL_PARAM = 10

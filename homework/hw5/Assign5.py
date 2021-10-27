@@ -35,7 +35,7 @@ def SVM_DUAL(Dx, Dy):
                 K_row.append(np.dot(Dx[i, :], Dx[j, :]))
             else:
                 diff = Dx[i, :] - Dx[j, :]
-                kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM))
+                kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM ** 2))
                 K_row.append(kernel)
         K.append(K_row)
     

@@ -6,15 +6,22 @@ import math
 import random as rd
 import time
 from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.svm import SVC
 
 np.set_printoptions(precision=3, suppress=False, threshold=5)
 
-FILENAME = "energydata_complete.csv"
-C = 0.5
-EPS = 0.01
-MAXITER = 5000
-KERNEL = "linear"
-KERNEL_PARAM = 10
+FILENAME = sys.argv[1]
+# 0.5
+C = float(sys.argv[2])
+# 0.01
+EPS = float(sys.argv[3])
+# 5000
+MAXITER = int(sys.argv[4])
+# linear gaussian
+KERNEL = sys.argv[5]
+# 65
+KERNEL_PARAM = float(sys.argv[6])
 
 # SVM dual
 def SVM_DUAL(Dx, Dy):
@@ -109,6 +116,7 @@ for i in range(5000):
 
 start = time.time()
 
+print("Running {} kernel: ".format(KERNEL))
 alpha = SVM_DUAL(Dx_train, Dy_train)
 sup_vec_num = np.count_nonzero(alpha)
 print("Number of support vectors for {} kernel: {}".format(KERNEL, sup_vec_num))
@@ -132,7 +140,12 @@ y_pred = np.sign(y_pred)
 y_pred = y_pred.reshape(1, -1)
 y_pred = np.transpose(y_pred)
 valid_accuracy = 1 - np.count_nonzero(y_pred-Dy_valid) / 2000
-print("Validation accuracy: {}".format(valid_accuracy))
+print("Validation accuracy: {:.3f}".format(valid_accuracy))
+
+clf = make_pipeline(StandardScaler(), SVC(C=float(sys.argv[2]), kernel="linear"))
+clf.fit(Dx_train, np.reshape(Dy_train, (5000,)))
+#print(clf.predict(Dx_valid))
+print("sklearn validation accuracy:", 1 - np.count_nonzero(clf.predict(Dx_valid) - np.reshape(Dy_valid, (2000,))) / 2000)
 
 # start test
 y_pred = []
@@ -153,8 +166,9 @@ for i in range(5000):
 y_pred = np.sign(y_pred)
 y_pred = y_pred.reshape(1, -1)
 y_pred = np.transpose(y_pred)
-valid_accuracy = 1 - np.count_nonzero(y_pred-Dy_test) / 5000
-print("Test accuracy: {}".format(valid_accuracy))
+test_accuracy = 1 - np.count_nonzero(y_pred-Dy_test) / 5000
+print("Test accuracy: {:.3f}".format(test_accuracy))
+print("sklearn test accuracy:", 1 - np.count_nonzero(clf.predict(Dx_test) - np.reshape(Dy_test, (5000,))) / 5000)
 
 end = time.time()
 print(end - start)

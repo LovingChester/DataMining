@@ -28,31 +28,30 @@ KERNEL_PARAM = float(sys.argv[6])
 def SVM_DUAL(Dx, Dy):
     # compute linear kernel matrix
     row, col = np.size(Dx, 0), np.size(Dx, 1)
+    
+
     K = []
-    for i in range(row):
-        K_row = []
-        for j in range(row):
-            if KERNEL == "linear":
-                K_row.append(np.dot(Dx[i, :], Dx[j, :]))
-            else:
+    if KERNEL == "linear":
+        K = np.matmul(Dx, np.transpose(Dx))
+    else:
+        for i in range(row):
+            K_row = []
+            for j in range(row):
                 diff = Dx[i, :] - Dx[j, :]
                 kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM ** 2))
                 K_row.append(kernel)
-        K.append(K_row)
-    
-    K = np.array(K)
+            K.append(K_row)
+        K = np.array(K)
 
     # augment K
-    #K = np.insert(K, 0, row*[1], axis=1)
     K_aug = np.copy(K)
-    for i in range(row):
-        for j in range(row):
-            K_aug[i, j] += 1
+    K_aug = K_aug + np.ones((row, row))
 
     # store the step size
     step_size = []
-    for k in range(row):
-        step_size.append(1 / K_aug[k, k])
+    step_size = np.reciprocal(np.diag(K_aug))
+    # for k in range(row):
+    #     step_size.append(1 / K_aug[k, k])
     
     t = 0
     alpha = np.zeros((row, 1))
@@ -128,18 +127,22 @@ print("Number of support vectors for {} kernel: {}".format(KERNEL, sup_vec_num))
 
 # start validation
 y_pred = []
-for i in range(2000):
-    point = Dx_valid[i, :]
-    value = 0
-    for j in range(5000):
-        train_x = Dx_train[j, :]
-        if KERNEL == 'linear':
-            value += alpha[j, 0] * Dy_train[j, 0] * (np.dot(train_x, point) + 1)
-        else:
+if KERNEL == 'linear':
+    K = np.matmul(Dx_valid, np.transpose(Dx_train))
+    K = K + np.ones((2000, 5000))
+    alpha_y = alpha * Dy_train
+    y_pred = alpha_y * np.transpose(K)
+    y_pred = np.sum(y_pred, axis=0)
+else:
+    for i in range(2000):
+        point = Dx_valid[i, :]
+        value = 0
+        for j in range(5000):
+            train_x = Dx_train[j, :]
             diff = train_x - point
-            kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM)) + 1
+            kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM ** 2)) + 1
             value += alpha[j, 0] * Dy_train[j, 0] * kernel
-    y_pred.append(value)
+        y_pred.append(value)
 
 y_pred = np.sign(y_pred)
 y_pred = y_pred.reshape(1, -1)
@@ -147,45 +150,52 @@ y_pred = np.transpose(y_pred)
 valid_accuracy = 1 - np.count_nonzero(y_pred-Dy_valid) / 2000
 print("Validation accuracy: {:.3f}".format(valid_accuracy))
 
-clf = make_pipeline(StandardScaler(), SVC(C=float(sys.argv[2]), kernel="linear"))
-clf.fit(Dx_train, np.reshape(Dy_train, (5000,)))
-#print(clf.predict(Dx_valid))
+clf = None
 if KERNEL == 'linear':
+    clf = make_pipeline(StandardScaler(), SVC(C=float(sys.argv[2]), kernel="linear"))
+    clf.fit(Dx_train, np.reshape(Dy_train, (5000,)))
+    print("sklearn validation accuracy:", 1 - np.count_nonzero(clf.predict(Dx_valid) - np.reshape(Dy_valid, (2000,))) / 2000)
+else:
+    clf = make_pipeline(StandardScaler(), SVC(C=float(sys.argv[2]), kernel="rbf", gamma=1/(2*KERNEL_PARAM**2)))
+    clf.fit(Dx_train, np.reshape(Dy_train, (5000,)))
     print("sklearn validation accuracy:", 1 - np.count_nonzero(clf.predict(Dx_valid) - np.reshape(Dy_valid, (2000,))) / 2000)
 
 # start test
-# y_pred = []
-# for i in range(5000):
-#     point = Dx_test[i, :]
-#     value = 0
-#     for j in range(5000):
-#         train_x = Dx_train[j, :]
-#         if KERNEL == 'linear':
-#             value += alpha[j, 0] * Dy_train[j, 0] * \
-#                 (np.dot(train_x, point) + 1)
-#         else:
-#             diff = train_x - point
-#             kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM)) + 1
-#             value += alpha[j, 0] * Dy_train[j, 0] * kernel
-#     y_pred.append(value)
+y_pred = []
+if KERNEL == 'linear':
+    K = np.matmul(Dx_valid, np.transpose(Dx_train))
+    K = K + np.ones((5000, 5000))
+    alpha_y = alpha * Dy_train
+    y_pred = alpha_y * np.transpose(K)
+    y_pred = np.sum(y_pred, axis=0)
+else:
+    for i in range(5000):
+        point = Dx_test[i, :]
+        value = 0
+        for j in range(5000):
+            train_x = Dx_train[j, :]
+            diff = train_x - point
+            kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM)) + 1
+            value += alpha[j, 0] * Dy_train[j, 0] * kernel
+        y_pred.append(value)
 
-# y_pred = np.sign(y_pred)
-# y_pred = y_pred.reshape(1, -1)
-# y_pred = np.transpose(y_pred)
-# test_accuracy = 1 - np.count_nonzero(y_pred-Dy_test) / 5000
-# print("Test accuracy: {:.3f}".format(test_accuracy))
-# if KERNEL == 'linear':
-#     print("sklearn test accuracy:", 1 - np.count_nonzero(clf.predict(Dx_test) - np.reshape(Dy_test, (5000,))) / 5000)
+y_pred = np.sign(y_pred)
+y_pred = y_pred.reshape(1, -1)
+y_pred = np.transpose(y_pred)
+test_accuracy = 1 - np.count_nonzero(y_pred-Dy_test) / 5000
+print("Test accuracy: {:.3f}".format(test_accuracy))
+
+print("sklearn test accuracy:", 1 - np.count_nonzero(clf.predict(Dx_test) - np.reshape(Dy_test, (5000,))) / 5000)
 
 # get w and b for linear kernel
-if KERNEL == 'linear':
-    w = np.zeros((1, 26))
-    for i in range(5000):
-        w += alpha[i, 0] * Dy_train[i, 0] * Dx_train[[i], :]
+# if KERNEL == 'linear':
+#     w = np.zeros((1, 26))
+#     for i in range(5000):
+#         w += alpha[i, 0] * Dy_train[i, 0] * Dx_train[[i], :]
 
-    b = np.average(Dy_train - np.matmul(Dx_train, np.transpose(w)))
-    print("w is {}".format(w))
-    print("b is {:.3f}".format(b))
+#     b = np.average(Dy_train - np.matmul(Dx_train, np.transpose(w)))
+#     print("w is {}".format(w))
+#     print("b is {:.3f}".format(b))
 
 end = time.time()
 print("running time: {}".format(end - start))

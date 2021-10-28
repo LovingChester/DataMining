@@ -28,7 +28,6 @@ KERNEL_PARAM = float(sys.argv[6])
 def SVM_DUAL(Dx, Dy):
     # compute linear kernel matrix
     row, col = np.size(Dx, 0), np.size(Dx, 1)
-    
 
     K = []
     if KERNEL == "linear":

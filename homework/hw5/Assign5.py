@@ -49,8 +49,6 @@ def SVM_DUAL(Dx, Dy):
     # store the step size
     step_size = []
     step_size = np.reciprocal(np.diag(K_aug))
-    # for k in range(row):
-    #     step_size.append(1 / K_aug[k, k])
     
     t = 0
     alpha = np.zeros((row, 1))

@@ -163,7 +163,7 @@ else:
 # start test
 y_pred = []
 if KERNEL == 'linear':
-    K = np.matmul(Dx_valid, np.transpose(Dx_train))
+    K = np.matmul(Dx_test, np.transpose(Dx_train))
     K = K + np.ones((5000, 5000))
     alpha_y = alpha * Dy_train
     y_pred = alpha_y * np.transpose(K)

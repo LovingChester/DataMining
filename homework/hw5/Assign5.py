@@ -10,9 +10,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.svm import SVC
 
 np.set_printoptions(precision=3, suppress=False, threshold=5)
+rd.seed(10)
 
 FILENAME = sys.argv[1]
-# 0.5
+# 0.05
 C = float(sys.argv[2])
 # 0.01
 EPS = float(sys.argv[3])
@@ -118,7 +119,11 @@ start = time.time()
 
 print("Running {} kernel: ".format(KERNEL))
 alpha = SVM_DUAL(Dx_train, Dy_train)
-sup_vec_num = np.count_nonzero(alpha)
+#sup_vec_num = np.count_nonzero(alpha)
+sup_vec_num = 0
+for i in range(5000):
+    if alpha[i, 0] > 0 and alpha[i, 0] < C:
+        sup_vec_num += 1
 print("Number of support vectors for {} kernel: {}".format(KERNEL, sup_vec_num))
 
 # start validation
@@ -145,30 +150,42 @@ print("Validation accuracy: {:.3f}".format(valid_accuracy))
 clf = make_pipeline(StandardScaler(), SVC(C=float(sys.argv[2]), kernel="linear"))
 clf.fit(Dx_train, np.reshape(Dy_train, (5000,)))
 #print(clf.predict(Dx_valid))
-print("sklearn validation accuracy:", 1 - np.count_nonzero(clf.predict(Dx_valid) - np.reshape(Dy_valid, (2000,))) / 2000)
+if KERNEL == 'linear':
+    print("sklearn validation accuracy:", 1 - np.count_nonzero(clf.predict(Dx_valid) - np.reshape(Dy_valid, (2000,))) / 2000)
 
 # start test
-y_pred = []
-for i in range(5000):
-    point = Dx_test[i, :]
-    value = 0
-    for j in range(5000):
-        train_x = Dx_train[j, :]
-        if KERNEL == 'linear':
-            value += alpha[j, 0] * Dy_train[j, 0] * \
-                (np.dot(train_x, point) + 1)
-        else:
-            diff = train_x - point
-            kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM)) + 1
-            value += alpha[j, 0] * Dy_train[j, 0] * kernel
-    y_pred.append(value)
+# y_pred = []
+# for i in range(5000):
+#     point = Dx_test[i, :]
+#     value = 0
+#     for j in range(5000):
+#         train_x = Dx_train[j, :]
+#         if KERNEL == 'linear':
+#             value += alpha[j, 0] * Dy_train[j, 0] * \
+#                 (np.dot(train_x, point) + 1)
+#         else:
+#             diff = train_x - point
+#             kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM)) + 1
+#             value += alpha[j, 0] * Dy_train[j, 0] * kernel
+#     y_pred.append(value)
 
-y_pred = np.sign(y_pred)
-y_pred = y_pred.reshape(1, -1)
-y_pred = np.transpose(y_pred)
-test_accuracy = 1 - np.count_nonzero(y_pred-Dy_test) / 5000
-print("Test accuracy: {:.3f}".format(test_accuracy))
-print("sklearn test accuracy:", 1 - np.count_nonzero(clf.predict(Dx_test) - np.reshape(Dy_test, (5000,))) / 5000)
+# y_pred = np.sign(y_pred)
+# y_pred = y_pred.reshape(1, -1)
+# y_pred = np.transpose(y_pred)
+# test_accuracy = 1 - np.count_nonzero(y_pred-Dy_test) / 5000
+# print("Test accuracy: {:.3f}".format(test_accuracy))
+# if KERNEL == 'linear':
+#     print("sklearn test accuracy:", 1 - np.count_nonzero(clf.predict(Dx_test) - np.reshape(Dy_test, (5000,))) / 5000)
+
+# get w and b for linear kernel
+if KERNEL == 'linear':
+    w = np.zeros((1, 26))
+    for i in range(5000):
+        w += alpha[i, 0] * Dy_train[i, 0] * Dx_train[[i], :]
+
+    b = np.average(Dy_train - np.matmul(Dx_train, np.transpose(w)))
+    print("w is {}".format(w))
+    print("b is {:.3f}".format(b))
 
 end = time.time()
-print(end - start)
+print("running time: {}".format(end - start))

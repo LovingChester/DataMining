@@ -172,7 +172,7 @@ else:
         for j in range(5000):
             train_x = Dx_train[j, :]
             diff = train_x - point
-            kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM)) + 1
+            kernel = math.e ** (-np.dot(diff, diff) / (2 * KERNEL_PARAM ** 2)) + 1
             value += alpha[j, 0] * Dy_train[j, 0] * kernel
         y_pred.append(value)
 

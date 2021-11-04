@@ -9,16 +9,17 @@ def Logistic_regression(Dx, Dy, maxiter, rate):
     row, col = np.size(Dx, 0), np.size(Dx, 1)
     Dx = np.insert(Dx, 0, row*[1], axis=1)
     t = 0
-    w = np.zeros((col+1, 1))
-    while t < maxiter:
-        w_copy = np.copy(w)
-        for i in range(row):
-            w_gradient = (Dy[i, 0] - expit(np.matmul(Dx[i, :], w_copy))) * np.transpose(Dx[i, :].reshape(1, -1))
-            w_copy = w_copy + rate * w_gradient
+    w = np.array([[1],[0.5],[0.5]])
+    #while t < maxiter:
+    w_copy = np.copy(w)
+        #for i in range(row):
+    w_gradient = (Dy[0, 0] - expit(np.matmul(Dx[0, :], w_copy))) * np.transpose(Dx[0, :].reshape(1, -1))
+    print(w_gradient)
+    w_copy = w_copy + rate * w_gradient
         
-        w = w_copy
-        print(w)
-        t = t + 1
+    w = w_copy
+    print(w)
+    t = t + 1
     
     return w
 
@@ -68,7 +69,20 @@ def SVM_DUAL(Dx, Dy, KERNEL, MAXITER, C, EPS, KERNEL_PARAM):
     print("iteration time: {}".format(t))
     return alpha
 
-Dx = np.array([[1,2],[3,4],[5,6]])
-Dy = np.array([[1],[-1],[1]])
-w = Logistic_regression(Dx, Dy, 3, 0.5)
+def ridge(Dx, Dy, alpha):
+    row, col = np.size(Dx, 0), np.size(Dx, 1)
+    Dx = np.insert(Dx, 0, row*[1], axis=1)
+    inv = np.linalg.pinv(np.matmul(np.transpose(Dx), Dx) + alpha * np.identity(col+1))
+    Y = np.matmul(np.transpose(Dx), Dy)
+    w = np.matmul(inv, Y)
+    return w
+
+Dx = np.array([[2,1],[1,2],[3,1],[2,2]])
+Dy = np.array([[1],[0],[1],[0]])
+w = Logistic_regression(Dx, Dy, 0, 1)
 print(w)
+# print(ridge(Dx, Dy, 0.5))
+
+
+# print(" ")
+# print(np.dot(np.array([-0.22,1.39,-0.83,0.78]), np.array([-0.22,1.39,-0.83,0.78])))

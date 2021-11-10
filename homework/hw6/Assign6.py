@@ -1,3 +1,4 @@
+from numpy.core.fromnumeric import mean
 import pandas as pd
 import sys
 import numpy as np
@@ -9,9 +10,23 @@ np.set_printoptions(precision=3, suppress=False, threshold=5)
 
 FILENAME = sys.argv[1]
 
-def BAYESCLASSIFIER(Dx, Dy):
 
-    return
+def BAYESCLASSIFIER(Dx, classes):
+    prior_prob = []
+    means = []
+    covs = []
+    for item in classes:
+        D = Dx[item, :]
+        n = np.size(D, 0)  # cardinality
+        P = n / 14735  # prior probability
+        prior_prob.append(P)
+        mean = np.mean(D, axis=0).reshape((-1, 1))
+        means.append(mean)
+        D_center = D - np.matmul(np.ones((n, 1)), np.transpose(mean))
+        cov = np.matmul(np.transpose(D_center), D_center) / n
+        covs.append(cov)
+        
+    return prior_prob, means, covs
 
 D = pd.read_csv(FILENAME)
 D.pop('date')
@@ -42,5 +57,17 @@ for i in range(14735):
         c2.append(i)
     else:
         c3.append(i)
+
+classes = [c0, c1, c2, c3]
+prior_prob, means, covs = BAYESCLASSIFIER(Dx, classes)
+
+y_pred = []
+for i in range(5000):
+    y_hat = []
+    for j in range(4):
+        y = multivariate_normal.pdf(
+            Dx_test[i], np.transpose(means[j]).reshape(26,), covs[j])
+        y_hat.append(y)
+    y_pred.append(y_hat.index(min(y_hat)))
 
 

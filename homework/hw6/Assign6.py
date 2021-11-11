@@ -22,7 +22,8 @@ def BAYESCLASSIFIER(Dx, classes):
         mean = np.mean(D, axis=0).reshape((-1, 1))
         means.append(mean)
         D_center = D - np.matmul(np.ones((n, 1)), np.transpose(mean))
-        cov = np.matmul(np.transpose(D_center), D_center) / n
+        #cov = np.matmul(np.transpose(D_center), D_center) / n
+        cov = np.cov(D, rowvar=False, bias=True)
         covs.append(cov)
         
     return prior_prob, means, covs
@@ -100,12 +101,12 @@ for i in range(5000):
     y_hat = []
     for j in range(4):
         y = multivariate_normal.pdf(
-            Dx_test[i], np.transpose(means[j]).reshape(26,), covs[j])
+            Dx_test[i], np.transpose(means[j]).reshape(26,), covs[j]) * prior_prob[j]
         y_hat.append(y)
     y_pred.append(y_hat.index(max(y_hat)))
 
 y_pred = np.array(y_pred).reshape((-1, 1))
 
-print("Total accuaracy: {}".format(np.count_nonzero(y_pred-Dy_test_class) / 5000))
+print("Total accuaracy: {}".format(1 - np.count_nonzero(y_pred-Dy_test_class) / 5000))
 
 prior_prob, means, v = NAIVEBAYES(Dx_train, classes)

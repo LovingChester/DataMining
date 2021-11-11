@@ -102,7 +102,7 @@ for i in range(5000):
         y = multivariate_normal.pdf(
             Dx_test[i], np.transpose(means[j]).reshape(26,), covs[j])
         y_hat.append(y)
-    y_pred.append(y_hat.index(min(y_hat)))
+    y_pred.append(y_hat.index(max(y_hat)))
 
 y_pred = np.array(y_pred).reshape((-1, 1))
 

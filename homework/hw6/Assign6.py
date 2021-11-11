@@ -65,19 +65,6 @@ Dy_train = Dy[range(0, 14735), :]
 Dx_test = Dx[range(14735, 19735), :]
 Dy_test = Dy[range(14735, 19735), :]
 
-Dy_test_class = []
-for i in range(5000):
-    if Dy_test[i, 0] <= 40:
-        Dy_test_class.append(0)
-    elif Dy_test[i, 0] <= 60:
-        Dy_test_class.append(1)
-    elif Dy_test[i, 0] <= 100:
-        Dy_test_class.append(2)
-    else:
-        Dy_test_class.append(3)
-
-Dy_test_class = np.array(Dy_test_class).reshape((-1, 1))
-
 c0 = []
 c1 = []
 c2 = []
@@ -107,6 +94,19 @@ for i in range(5000):
 
 y_pred = np.array(y_pred).reshape((-1, 1))
 
-print("Total accuaracy: {}".format(1 - np.count_nonzero(y_pred-Dy_test_class) / 5000))
+Dy_test_class = []
+for i in range(5000):
+    if Dy_test[i, 0] <= 40:
+        Dy_test_class.append(0)
+    elif Dy_test[i, 0] <= 60:
+        Dy_test_class.append(1)
+    elif Dy_test[i, 0] <= 100:
+        Dy_test_class.append(2)
+    else:
+        Dy_test_class.append(3)
+
+Dy_test_class = np.array(Dy_test_class).reshape((-1, 1))
+
+print("Total accuaracy for full Bayes: {}".format(1 - np.count_nonzero(y_pred-Dy_test_class) / 5000))
 
 prior_prob, means, v = NAIVEBAYES(Dx_train, classes)

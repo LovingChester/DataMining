@@ -94,19 +94,64 @@ for i in range(5000):
 
 y_pred = np.array(y_pred).reshape((-1, 1))
 
+c0_test = []
+c1_test = []
+c2_test = []
+c3_test = []
 Dy_test_class = []
 for i in range(5000):
     if Dy_test[i, 0] <= 40:
         Dy_test_class.append(0)
+        c0_test.append(i)
     elif Dy_test[i, 0] <= 60:
         Dy_test_class.append(1)
+        c1_test.append(i)
     elif Dy_test[i, 0] <= 100:
         Dy_test_class.append(2)
+        c2_test.append(i)
     else:
         Dy_test_class.append(3)
+        c3_test.append(i)
 
 Dy_test_class = np.array(Dy_test_class).reshape((-1, 1))
 
-print("Total accuaracy for full Bayes: {}".format(1 - np.count_nonzero(y_pred-Dy_test_class) / 5000))
+c0_pred = []
+c1_pred = []
+c2_pred = []
+c3_pred = []
+for i in range(5000):
+    if y_pred[i, 0] == 0:
+        c0_pred.append(i)
+    elif y_pred[i, 0] == 1:
+        c1_pred.append(i)
+    elif y_pred[i, 0] == 2:
+        c2_pred.append(i)
+    else:
+        c3_pred.append(i)
 
-prior_prob, means, v = NAIVEBAYES(Dx_train, classes)
+print("Total accuaracy for full Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred-Dy_test_class) / 5000))
+print("class 0 recall for full Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred[c0_test, :]-Dy_test_class[c0_test, :]) / len(c0_test)))
+print("class 1 recall for full Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred[c1_test, :]-Dy_test_class[c1_test, :]) / len(c1_test)))
+print("class 2 recall for full Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred[c2_test, :]-Dy_test_class[c2_test, :]) / len(c2_test)))
+print("class 3 recall for full Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred[c3_test, :]-Dy_test_class[c3_test, :]) / len(c3_test)))
+print("class 0 specific accuracy for full Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred[c0_pred, :]-Dy_test_class[c0_pred, :]) / len(c0_pred)))
+print("class 1 specific accuracy for full Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred[c1_pred, :]-Dy_test_class[c1_pred, :]) / len(c1_pred)))
+print("class 2 specific accuracy for full Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred[c2_pred, :]-Dy_test_class[c2_pred, :]) / len(c2_pred)))
+print("class 3 specific accuracy for full Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred[c3_pred, :]-Dy_test_class[c3_pred, :]) / len(c3_pred)))
+
+# prior_prob, means, v = NAIVEBAYES(Dx_train, classes)
+
+# y_pred = []
+# for i in range(5000):
+#     y_hat = []
+#     for j in range(4):
+#         y = 1
+#         for k in range(26):
+#             y *= multivariate_normal.pdf(Dx_test[i, k], means[j][k, 0], v[j][k, 0])
+#         y *= prior_prob[j]
+#         y_hat.append(y)
+#     y_pred.append(y_hat.index(max(y_hat)))
+
+# y_pred = np.array(y_pred).reshape((-1, 1))
+
+# print("Total accuaracy for naive Bayes: {:.3f}".format(1 - np.count_nonzero(y_pred-Dy_test_class) / 5000))

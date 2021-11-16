@@ -1,6 +1,7 @@
 import pandas as pd
 import sys
 import numpy as np
+from scipy.stats import multivariate_normal
 
 np.set_printoptions(precision=3, suppress=False, threshold=5)
 
@@ -40,9 +41,27 @@ def EXPECTATION_MAXIMIZATION(D):
     for i in range(k):
         prob_Cs.append(1/k)
     
+    # initial w where each entry is 0
+    w = np.full((k, row), 0)
+
+    # compute prob sum for on each point
+    prob_sum = []
+    for i in range(row):
+        total = 0
+        for j in range(k):
+            total += multivariate_normal.logpdf(D[i], centers[j], covs[j], allow_singular=True)
+        prob_sum.append(total)
+
     while(True):
         t += 1
+        # Expection Step
+        for i in range(k):
+            for j in range(row):
+                w[i, j] = multivariate_normal.logpdf(D[j], centers[i], covs[i], allow_singular=True) / prob_sum[j]
         
+        # Maximization Step
+        for i in range(k):
+            break
         break
 
     return

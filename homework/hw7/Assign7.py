@@ -58,7 +58,7 @@ def EXPECTATION_MAXIMIZATION(D):
     for i in range(row):
         data = []
         for j in range(K):
-            pdf = multivariate_normal.logpdf(D[i], centers[j], covs[j], allow_singular=True)
+            pdf = multivariate_normal.logpdf(D[i], centers[j], covs[j], allow_singular=True) * prob_Cs[j]
             pdf += np.log(prob_Cs[j])
             #pdf += multivariate_normal.logpdf(prob_Cs[j], centers[j], covs[j], allow_singular=True)
             data.append(pdf)
@@ -72,7 +72,7 @@ def EXPECTATION_MAXIMIZATION(D):
         # Expection Step
         for i in range(K):
             for j in range(row):
-                log_w = multivariate_normal.logpdf(D[j], centers[i], covs[i], allow_singular=True)
+                log_w = multivariate_normal.logpdf(D[j], centers[i], covs[i], allow_singular=True) * prob_Cs[i]
                 log_w += np.log(prob_Cs[i])
                 #log_w += multivariate_normal.logpdf(prob_Cs[i], centers[i], covs[i], allow_singular=True)
                 # if t == 2:

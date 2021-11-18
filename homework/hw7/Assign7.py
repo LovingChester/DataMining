@@ -68,7 +68,7 @@ def EXPECTATION_MAXIMIZATION(D):
         t += 1
 
         prev_centers = np.copy(centers)
-
+        print(multivariate_normal.logpdf(D, centers[0], covs[0], allow_singular=True))
         for j in range(row):
             log_ws = []
             for i in range(K):

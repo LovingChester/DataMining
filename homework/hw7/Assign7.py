@@ -12,6 +12,32 @@ EPS = float(sys.argv[3])
 RIDGE = float(sys.argv[4])
 MAXITER = int(sys.argv[5])
 
+# compute pdf manually
+def compute_pdf(x, center, cov):
+    col = np.size(cov, 1)
+    first = 1 / (np.sqrt(2*np.pi) ** col) * np.sqrt(np.linalg.det(cov))
+    upper = np.matmul((x-center).reshape(1, -1), np.linalg.inv(cov + RIDGE*np.identity(col)))
+    upper = np.matmul(upper, (x-center).reshape(-1, 1))
+    upper = upper[0][0]
+    second = -upper / 2
+    return first, second
+
+def compute_log_sum(D, centers, covs, prob_Cs):
+    log_sum = []
+    for i in range(row):
+        data = []
+        for j in range(K):
+            log_w = multivariate_normal.logpdf(D[i], centers[j], covs[j], allow_singular=True)
+            # first, second = compute_pdf(D[i], centers[j], covs[j])
+            # log_w = np.log(first) + second
+            log_w += np.log(prob_Cs[j])
+            data.append(log_w)
+        max_num = max(data)
+        data = np.array(data) - max_num
+        log_sum.append(logsumexp(data)+max_num)
+
+    return log_sum
+
 def EXPECTATION_MAXIMIZATION(D):
     row, col = np.size(D, 0), np.size(D, 1)
     t = 0
@@ -19,7 +45,7 @@ def EXPECTATION_MAXIMIZATION(D):
     index = np.random.choice(row, 1)
     centers = D[index, :]
     # compute rest of the centers
-    for i in range(3):
+    for i in range(K-1):
         size = np.size(centers, 0)
         dists = []
         for j in range(row):
@@ -44,56 +70,38 @@ def EXPECTATION_MAXIMIZATION(D):
     
     # initial w where each entry is 0
     w = np.full((K, row), 0)
-    # compute prob sum for on each point
-    # prob_sum = []
-    # for i in range(row):
-    #     total = 0
-    #     for j in range(K):
-    #         total += multivariate_normal.logpdf(D[i], centers[j], covs[j], allow_singular=True)
-    #         total += multivariate_normal.logpdf(prob_Cs[j], centers[j], covs[j], allow_singular=True)
-    #     prob_sum.append(total)
-
-    # compute the logsumexp
-    log_sum = []
-    for i in range(row):
-        data = []
-        for j in range(K):
-            pdf = multivariate_normal.logpdf(D[i], centers[j], covs[j], allow_singular=True) * prob_Cs[j]
-            pdf += np.log(prob_Cs[j])
-            #pdf += multivariate_normal.logpdf(prob_Cs[j], centers[j], covs[j], allow_singular=True)
-            data.append(pdf)
-        log_sum.append(logsumexp(data))
 
     while(t < MAXITER):
         t += 1
 
         prev_centers = np.copy(centers)
 
+        # compute the logsumexp
+        log_sum = compute_log_sum(D, centers, covs, prob_Cs)
+
         # Expection Step
         for i in range(K):
             for j in range(row):
-                log_w = multivariate_normal.logpdf(D[j], centers[i], covs[i], allow_singular=True) * prob_Cs[i]
+                log_w = multivariate_normal.logpdf(D[j], centers[i], covs[i], allow_singular=True)
+                # first, second = compute_pdf(D[j], centers[i], covs[i])
+                # log_w = np.log(first) + second
                 log_w += np.log(prob_Cs[i])
-                #log_w += multivariate_normal.logpdf(prob_Cs[i], centers[i], covs[i], allow_singular=True)
-                # if t == 2:
-                #     print(log_w)
-                #     print(log_sum[j])
-                #     print(np.exp(log_w - log_sum[j]))
+
                 w[i, j] = np.exp(log_w - log_sum[j])
-        #print(w)
+        print(w)
         # Maximization Step
         for i in range(K):
             center = np.matmul(np.transpose(D), np.transpose(w[[i], :])) / np.matmul(w[[i], :], np.ones((row, 1)))
             centers[i] = center.reshape((col,))
             
             center_D = np.copy(D)
-            print(centers[i,:])
+            #print(centers[i,:])
             center_D = center_D - np.matmul(np.ones((row, 1)), centers[[i], :])
 
             cov_sum = np.zeros((col, col))
             for j in range(row):
                 cov_sum += w[i, j] * np.outer(np.transpose(center_D[[j], :]), center_D[[j], :])
-            
+
             covs[i] = cov_sum / np.matmul(w[[i], :], np.ones((row, 1)))
 
             prob = np.matmul(w[i, :], np.ones((row, 1))) / row
@@ -111,7 +119,6 @@ def EXPECTATION_MAXIMIZATION(D):
 D = pd.read_csv(FILENAME)
 D.pop('date')
 D.pop('rv2')
-print(D)
 
 D = D.to_numpy()
 
@@ -137,5 +144,4 @@ for i in range(row):
         c2.append(i)
     else:
         c3.append(i)
-
 

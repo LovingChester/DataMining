@@ -104,7 +104,7 @@ def EXPECTATION_MAXIMIZATION(D):
         if diff <= EPS:
             break
 
-    return w
+    return w, centers, covs
 
 D = pd.read_csv(FILENAME)
 D.pop('date')
@@ -117,7 +117,7 @@ row = np.size(D, 0)
 Dx = D[:, range(1, 27)]
 Dy = D[:, [0]]
 
-w = EXPECTATION_MAXIMIZATION(Dx)
+w, centers, covs = EXPECTATION_MAXIMIZATION(Dx)
 print(w)
 
 c0 = []

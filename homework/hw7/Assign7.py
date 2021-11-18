@@ -15,7 +15,7 @@ MAXITER = int(sys.argv[5])
 # compute pdf manually
 def compute_pdf(x, center, cov):
     col = np.size(cov, 1)
-    first = 1 / (np.sqrt(2*np.pi) ** col) * np.sqrt(np.linalg.det(cov))
+    first = 1 / (np.sqrt(2*np.pi) ** col) * np.sqrt(np.linalg.det(cov + RIDGE*np.identity(col)))
     upper = np.matmul((x-center).reshape(1, -1), np.linalg.inv(cov + RIDGE*np.identity(col)))
     upper = np.matmul(upper, (x-center).reshape(-1, 1))
     upper = upper[0][0]
@@ -33,6 +33,7 @@ def compute_log_sum(D, centers, covs, prob_Cs):
             log_w += np.log(prob_Cs[j])
             data.append(log_w)
         max_num = max(data)
+        print(data)
         data = np.array(data) - max_num
         log_sum.append(logsumexp(data)+max_num)
 

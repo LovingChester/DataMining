@@ -1,43 +1,17 @@
+from numpy.ma import log
 import pandas as pd
 import sys
 import numpy as np
 from scipy.stats import multivariate_normal
 from scipy.special import logsumexp
 
-np.set_printoptions(precision=3, suppress=False, threshold=5)
+#np.set_printoptions(precision=3, suppress=False, threshold=5)
 
 FILENAME = sys.argv[1]
 K = int(sys.argv[2])
 EPS = float(sys.argv[3])
 RIDGE = float(sys.argv[4])
 MAXITER = int(sys.argv[5])
-
-# compute pdf manually
-def compute_pdf(x, center, cov):
-    col = np.size(cov, 1)
-    first = 1 / (np.sqrt(2*np.pi) ** col) * np.sqrt(np.linalg.det(cov + RIDGE*np.identity(col)))
-    upper = np.matmul((x-center).reshape(1, -1), np.linalg.inv(cov + RIDGE*np.identity(col)))
-    upper = np.matmul(upper, (x-center).reshape(-1, 1))
-    upper = upper[0][0]
-    second = -upper / 2
-    return first, second
-
-def compute_log_sum(D, centers, covs, prob_Cs):
-    log_sum = []
-    for i in range(row):
-        data = []
-        for j in range(K):
-            log_w = multivariate_normal.logpdf(D[i], centers[j], covs[j], allow_singular=True)
-            # first, second = compute_pdf(D[i], centers[j], covs[j])
-            # log_w = np.log(first) + second
-            log_w += np.log(prob_Cs[j])
-            data.append(log_w)
-        max_num = max(data)
-        print(data)
-        data = np.array(data) - max_num
-        log_sum.append(logsumexp(data)+max_num)
-
-    return log_sum
 
 def EXPECTATION_MAXIMIZATION(D):
     row, col = np.size(D, 0), np.size(D, 1)
@@ -58,64 +32,79 @@ def EXPECTATION_MAXIMIZATION(D):
         index = dists.index(max(dists))
         centers = np.append(centers, D[[index], :], axis=0)
     
+    #print(centers)
+
+    center_cluster = dict()
+    for i in range(K):
+        center_cluster[i] = []
+    
+    for i in range(row):
+        distances = []
+        for j in range(K):
+            dist = np.linalg.norm(centers[j] - D[i])
+            distances.append(dist)
+        index = distances.index(min(distances))
+        center_cluster[index].append(D[i])
+    
+    for i in range(K):
+        center_cluster[i] = np.array(center_cluster[i])
+
     # initialize cov matrix
     covs = []
     for i in range(K):
-        covs.append(np.identity(col))
+        covs.append(np.cov(center_cluster[i], rowvar=False, bias=True))
     covs = np.array(covs)
 
     # initialize prior probability
     prob_Cs = []
     for i in range(K):
-        prob_Cs.append(1/K)
-    
+        size = np.size(center_cluster[i], 0)
+        prob_Cs.append(size/row)
+
     # initial w where each entry is 0
-    w = np.full((K, row), 0)
+    w = np.full((K, row), 0.0)
 
     while(t < MAXITER):
         t += 1
 
         prev_centers = np.copy(centers)
 
-        # compute the logsumexp
-        log_sum = compute_log_sum(D, centers, covs, prob_Cs)
-
-        # Expection Step
-        for i in range(K):
-            for j in range(row):
+        for j in range(row):
+            log_ws = []
+            for i in range(K):
                 log_w = multivariate_normal.logpdf(D[j], centers[i], covs[i], allow_singular=True)
-                # first, second = compute_pdf(D[j], centers[i], covs[i])
-                # log_w = np.log(first) + second
                 log_w += np.log(prob_Cs[i])
+                log_ws.append(log_w)
+            log_sum_exp = logsumexp(log_ws)
+            for i in range(K):
+                w[i, j] = np.exp(log_ws[i] - log_sum_exp)
 
-                w[i, j] = np.exp(log_w - log_sum[j])
-        print(w)
         # Maximization Step
         for i in range(K):
-            center = np.matmul(np.transpose(D), np.transpose(w[[i], :])) / np.matmul(w[[i], :], np.ones((row, 1)))
-            centers[i] = center.reshape((col,))
-            
-            center_D = np.copy(D)
-            #print(centers[i,:])
-            center_D = center_D - np.matmul(np.ones((row, 1)), centers[[i], :])
+            center = np.matmul(np.transpose(D), np.transpose(w[[i], :])) / sum(w[i])
+            centers[i] = np.transpose(center)
 
-            cov_sum = np.zeros((col, col))
+            D_center = np.copy(D)
+            D_center = D_center - np.matmul(np.ones((row, 1)), np.transpose(center))
+
+            cov = np.full((col, col), 0.0)
             for j in range(row):
-                cov_sum += w[i, j] * np.outer(np.transpose(center_D[[j], :]), center_D[[j], :])
+                cov += w[i, j] * np.outer(np.transpose(D_center[[j], :]), D_center[[j], :])
+            cov /= sum(w[i])
 
-            covs[i] = cov_sum / np.matmul(w[[i], :], np.ones((row, 1)))
+            covs[i] = cov
 
-            prob = np.matmul(w[i, :], np.ones((row, 1))) / row
-            prob_Cs[i] = prob[0]
+            prob_Cs[i] = sum(w[i]) / row
 
         diff = 0
         for i in range(K):
             diff += np.linalg.norm(centers[i] - prev_centers[i]) ** 2
 
+        print("iter {}: {}".format(t, diff))
         if diff <= EPS:
             break
 
-    return t
+    return w
 
 D = pd.read_csv(FILENAME)
 D.pop('date')
@@ -128,8 +117,8 @@ row = np.size(D, 0)
 Dx = D[:, range(1, 27)]
 Dy = D[:, [0]]
 
-t = EXPECTATION_MAXIMIZATION(Dx)
-print(t)
+w = EXPECTATION_MAXIMIZATION(Dx)
+print(w)
 
 c0 = []
 c1 = []

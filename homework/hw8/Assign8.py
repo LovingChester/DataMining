@@ -1,10 +1,11 @@
+from os import replace
 import pandas as pd
 import sys
 import numpy as np
 from scipy.spatial import distance_matrix
 from sklearn.model_selection import StratifiedShuffleSplit
 
-np.set_printoptions(precision=3, suppress=False, threshold=5)
+np.set_printoptions(precision=5, suppress=False, threshold=5)
 np.random.seed(10)
 
 FILENAME = sys.argv[1]
@@ -12,6 +13,37 @@ K = int(sys.argv[2])
 n = int(sys.argv[3])
 spread = float(sys.argv[4])
 obj = sys.argv[5]
+
+def K_MEANS(D):
+    t = 0
+    indexs = np.random.choice(n, 4, replace=False)
+    centers = D[indexs, :]
+    center_cluster = None
+    while True:
+        prev_centers = np.copy(centers)
+
+        center_cluster = dict()
+        for i in range(K):
+            center_cluster[i] = []
+        
+        point_dist = distance_matrix(D, centers)
+        min_dist = np.argmin(point_dist, axis=1)
+
+        for i in range(n):
+            center_cluster[min_dist[i]].append(D[i])
+        
+        # update centers
+        for i in range(K):
+            centers[i] = sum(center_cluster[i]) / len(center_cluster[i])
+
+        diff = np.sum(np.linalg.norm(prev_centers - centers, axis=0))
+
+        if diff <= 0.001:
+            break
+
+        t += 1
+
+    return center_cluster
 
 def SPECTRAL_CLUSTERING(D):
     # compute similarity matrix
@@ -48,10 +80,12 @@ def SPECTRAL_CLUSTERING(D):
     e_vectors = e_vectors[:, range(K)]
 
     row_square_sum = np.sqrt(np.sum(e_vectors ** 2, axis=1).reshape(-1, 1))
-
     Y = e_vectors / row_square_sum
 
-    return
+    # apply K-means
+    center_cluster = K_MEANS(Y)
+
+    return center_cluster
 
 D = pd.read_csv(FILENAME)
 D.pop('date')
@@ -86,9 +120,10 @@ for i in range(row):
 
 classes = [c0, c1, c2, c3]
 
-sss = StratifiedShuffleSplit(train_size=1000)
+sss = StratifiedShuffleSplit(train_size=n)
 for train_index, test_index in sss.split(Dx, Dy_cluster):
     X_train, X_test = Dx[train_index], Dx[test_index]
-    SPECTRAL_CLUSTERING(X_train)
+    center_cluster = SPECTRAL_CLUSTERING(X_train)
+    print(center_cluster)
     break
 

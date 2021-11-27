@@ -5,7 +5,7 @@ import numpy as np
 from scipy.spatial import distance_matrix
 from sklearn.model_selection import StratifiedShuffleSplit
 
-np.set_printoptions(precision=5, suppress=False, threshold=5)
+#np.set_printoptions(precision=5, suppress=False, threshold=5)
 np.random.seed(10)
 
 FILENAME = sys.argv[1]
@@ -82,6 +82,8 @@ def SPECTRAL_CLUSTERING(D):
 
     e_values = e_values[: K]
     e_vectors = e_vectors[:, range(K)]
+
+    #print(e_vectors)
 
     row_square_sum = np.sqrt(np.sum(e_vectors ** 2, axis=1).reshape(-1, 1))
     Y = e_vectors / row_square_sum

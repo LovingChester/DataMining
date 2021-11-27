@@ -19,31 +19,35 @@ def K_MEANS(D):
     indexs = np.random.choice(n, 4, replace=False)
     centers = D[indexs, :]
     center_cluster = None
+    center_indexs = None
     while True:
         prev_centers = np.copy(centers)
 
         center_cluster = dict()
+        center_indexs = dict()
         for i in range(K):
             center_cluster[i] = []
+            center_indexs[i] = []
         
         point_dist = distance_matrix(D, centers)
         min_dist = np.argmin(point_dist, axis=1)
 
         for i in range(n):
             center_cluster[min_dist[i]].append(D[i])
+            center_indexs[min_dist[i]].append(i)
         
         # update centers
         for i in range(K):
             centers[i] = sum(center_cluster[i]) / len(center_cluster[i])
 
-        diff = np.sum(np.linalg.norm(prev_centers - centers, axis=0))
+        diff = np.sum(np.linalg.norm(prev_centers - centers, axis=0) ** 2)
 
         if diff <= 0.001:
             break
-
+        #print(t)
         t += 1
 
-    return center_cluster
+    return center_cluster, center_indexs
 
 def SPECTRAL_CLUSTERING(D):
     # compute similarity matrix
@@ -120,10 +124,38 @@ for i in range(row):
 
 classes = [c0, c1, c2, c3]
 
+center_cluster = None
+center_indexs = None
 sss = StratifiedShuffleSplit(train_size=n)
 for train_index, test_index in sss.split(Dx, Dy_cluster):
     X_train, X_test = Dx[train_index], Dx[test_index]
-    center_cluster = SPECTRAL_CLUSTERING(X_train)
-    print(center_cluster)
+    center_cluster, center_indexs = SPECTRAL_CLUSTERING(X_train)
+    #print(center_cluster)
     break
 
+precs = []
+for i in range(K):
+    sub_score = []
+    for j in range(K):
+        score = len(set(center_indexs[i]) & set(classes[j]))
+        sub_score.append(score)
+    prec = max(sub_score) / len(center_cluster[i])
+    precs.append(prec)
+
+recalls = []
+for i in range(K):
+    sub_score = []
+    for j in range(K):
+        score = len(set(center_indexs[i]) & set(classes[j]))
+        sub_score.append(score)
+    recall = max(sub_score)
+    frac = len(set(center_indexs[i]) & set(classes[j])) / len(center_cluster[i])
+    recall /= frac
+    recalls.append(recall)
+
+F = 0
+for i in range(K):
+    F_i = (2 * precs[i] * recalls[i]) / (precs[i] + recalls[i])
+    F += F_i
+
+print("The F score is {}".format(F / K))

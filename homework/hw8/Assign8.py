@@ -89,9 +89,9 @@ def SPECTRAL_CLUSTERING(D):
     Y = e_vectors / row_square_sum
 
     # apply K-means
-    center_cluster = K_MEANS(Y)
+    center_cluster, center_indexs = K_MEANS(Y)
 
-    return center_cluster
+    return center_cluster, center_indexs
 
 D = pd.read_csv(FILENAME)
 D.pop('date')
